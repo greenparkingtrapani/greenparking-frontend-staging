@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, RefreshCcw } from "lucide-react";
+import { Plus, RefreshCcw, Archive, CalendarDays, CalendarClock, List } from "lucide-react";
 import { CreateReservationModal } from "@/components/admin/dashboard/reservations/modal/CreateDashboardReservations";
 import { getAdminReservations } from "@/lib/admin/dashboard/reservations/getAdminReservations";
 import { deleteAdminReservation } from "@/lib/admin/dashboard/reservations/deleteAdminReservations";
@@ -23,6 +23,13 @@ import { FiltersDashboardReservations } from "./FiltersDashboardReservations";
 export default function AdminDashboardReservations() {
   const itemsPerPage = 10;
   const [sort, setSort] = useState<ReservationSort>(null);
+  /* GREENPARKING_AGENDA_V1 */
+  const [view, setView] = useState<"today" | "upcoming" | "archive" | "all">("today");
+  const changeView = (next: typeof view) => {
+    setView(next);
+    setSort(null);
+    resetPagination();
+  };
 
   const queryClient = useQueryClient();
   // Hook para estado de la UI (modal, paginación, etc.)
@@ -73,7 +80,7 @@ export default function AdminDashboardReservations() {
     gcTime: 25 * 60 * 60 * 1000, // Cache
   });
 
-  const filterSignature = JSON.stringify([filters, sort]);
+  const filterSignature = JSON.stringify([filters, sort, view]);
   const [previousFilterSignature, setPreviousFilterSignature] =
     useState(filterSignature);
   const queryPage =
@@ -86,7 +93,7 @@ export default function AdminDashboardReservations() {
     refetch,
     error: GetReservationError,
   } = useQuery({
-    queryKey: ["adminReservations", queryPage, itemsPerPage, filters, sort],
+    queryKey: ["adminReservations", queryPage, itemsPerPage, filters, sort, view],
     queryFn: ({ signal }) =>
       getAdminReservations(token, {
         limit: itemsPerPage,
@@ -98,6 +105,7 @@ export default function AdminDashboardReservations() {
         vehicle_type_name: filters.vehicleType,
         sort_by: sort?.key,
         sort_order: sort?.direction,
+        view,
       }, signal),
     enabled: isAuthenticated,
     refetchOnWindowFocus: false,
@@ -114,6 +122,28 @@ export default function AdminDashboardReservations() {
   useEffect(() => {
     queryClient.removeQueries({ queryKey: ["adminReservations"] });
   }, [token, queryClient]);
+
+  // GREENPARKING_DELETE_V1: physically remove ONLY unpaid canceled/finished reservations.
+  const purgeMutation = useMutation({
+    mutationFn: async (reservation: ReservationDashboard) => {
+      const api = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(
+        `${api}/admin/reservations/${encodeURIComponent(reservation.code)}/purge`,
+        { method: "POST", headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ confirm_code: reservation.code }) }
+      );
+      if (!response.ok) throw new Error(`Eliminazione non consentita (HTTP ${response.status})`);
+    },
+    onSuccess: () => {
+      toast.success("Prenotazione eliminata definitivamente.");
+      resetPagination();
+      queryClient.invalidateQueries({ queryKey: ["adminReservations"] });
+    },
+    onError: (error: Error) => {
+      handleAuthError(error);
+      toast.error(error.message);
+    },
+  });
 
   // Mutación para cancelar reserva
   const cancelMutation = useMutation({
@@ -226,6 +256,34 @@ export default function AdminDashboardReservations() {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4" role="group" aria-label="Viste prenotazioni">
+        {([
+          { id: "today", label: "Oggi", Icon: CalendarDays },
+          { id: "upcoming", label: "Prossime", Icon: CalendarClock },
+          { id: "archive", label: "Archivio", Icon: Archive },
+          { id: "all", label: "Tutte", Icon: List },
+        ] as const).map(({ id, label, Icon }) => (
+          <Button
+            key={id}
+            type="button"
+            variant={view === id ? "default" : "outline"}
+            size="mobile"
+            aria-pressed={view === id}
+            onClick={() => changeView(id)}
+            className="min-w-0 w-full gap-1 sm:gap-2"
+          >
+            <Icon className="h-4 w-4 shrink-0" />
+            {label}
+          </Button>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground mb-4">
+        {view === "today" ? "Prenotazioni da gestire oggi, incluse quelle già iniziate e ancora in corso." :
+         view === "upcoming" ? "Prenotazioni dei prossimi giorni, ordinate per ingresso." :
+         view === "archive" ? "Prenotazioni concluse o annullate: rimangono consultabili e non vengono eliminate." :
+         "Elenco completo delle prenotazioni."}
+      </p>
+
       {/* Filtros */}
       <FiltersDashboardReservations
         filters={filters}
@@ -254,6 +312,7 @@ export default function AdminDashboardReservations() {
           <TableDashboardReservations
             reservations={reservations}
             onCancelReservation={handleCancelReservation}
+            onPurgeReservation={(reservation) => purgeMutation.mutate(reservation)}
             getStatusBadge={getStatusBadge}
             sort={sort}
             onSortChange={setSort}

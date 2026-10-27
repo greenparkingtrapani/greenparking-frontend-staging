@@ -53,6 +53,8 @@ const sortableHeaders: { key: SortKey; label: string }[] = [
 interface TableDashboardReservationsProps {
   reservations: ReservationDashboard[];
   onCancelReservation: (reservation: ReservationDashboard, refund: boolean) => void;
+  // GREENPARKING_DELETE_V1
+  onPurgeReservation: (reservation: ReservationDashboard) => void;
   getStatusBadge: (status: string) => string;
   sort: ReservationSort;
   onSortChange: (sort: ReservationSort) => void;
@@ -61,12 +63,15 @@ interface TableDashboardReservationsProps {
 export function TableDashboardReservations({
   reservations,
   onCancelReservation,
+  onPurgeReservation,
   getStatusBadge,
   sort,
   onSortChange,
 }: TableDashboardReservationsProps) {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
   const [refund, setRefund] = useState(false);
+  const [purgeCode, setPurgeCode] = useState<string | null>(null);
+  const [typedCode, setTypedCode] = useState("");
 
   const handleSort = (key: SortKey) => {
     if (sort?.key !== key) return onSortChange({ key, direction: "asc" });
@@ -252,6 +257,38 @@ export function TableDashboardReservations({
                         >
                           Conferma
                         </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+                {/* GREENPARKING_DELETE_V1: do not offer physical deletion for paid bookings */}
+                {(reservation.status === "finished" || reservation.status === "canceled") &&
+                  !["succeeded", "refunded", "paid"].includes((reservation.payment_status || "").toLowerCase()) && (
+                  <AlertDialog open={purgeCode === reservation.code} onOpenChange={(open) => {
+                    setPurgeCode(open ? reservation.code : null);
+                    setTypedCode("");
+                  }}>
+                    <AlertDialogTrigger asChild>
+                      <Button type="button" variant="outline" size="mobile" className="ml-2 text-destructive border-destructive/50" onClick={() => setPurgeCode(reservation.code)}>
+                        Elimina definitivamente
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Eliminazione definitiva</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Eliminerai definitivamente la prenotazione {reservation.code}. Non è un annullamento e non genera rimborsi.
+                          Questa operazione non si può annullare. Digita il codice per confermare.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <input aria-label="Digita il codice prenotazione" className="w-full rounded border bg-background p-2" value={typedCode} onChange={(e) => setTypedCode(e.target.value.trim())} placeholder={reservation.code} />
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annulla</AlertDialogCancel>
+                        <AlertDialogAction disabled={typedCode !== reservation.code} className="bg-destructive text-destructive-foreground hover:bg-destructive/80" onClick={() => {
+                          setPurgeCode(null);
+                          setTypedCode("");
+                          onPurgeReservation(reservation);
+                        }}>Elimina per sempre</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
