@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .dark {
+    --brand-black: 0 0% 0%;
+    --brand-black-foreground: 0 0% 100%;
+    --overlay: var(--brand-black);
+    --warning: 38 92% 50%;
+    --warning-foreground: 48 96% 89%;
+    --reservation-active: 142 71% 29%;
+    --reservation-active-foreground: 138 76% 86%;
+    --reservation-pending: 45 93% 47%;
+    --reservation-pending-foreground: 48 96% 89%;
+    --reservation-finished: 221 83% 53%;
+    --reservation-finished-foreground: 214 95% 93%;
+    --reservation-null: 220 14% 96%;
+    --reservation-null-foreground: 220 9% 26%;
+    --vehicle-car: 188 86% 53%;
+    --vehicle-motorcycle: 330 81% 60%;
+    --payment-online: 268 83% 68%;
+    --payment-onsite: 25 95% 58%;
+    --background: 0 0% 3%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 3%;
+    --card-foreground: 0 0% 90%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 100 50% 35%;
+    --primary-foreground: 144.9 80.4% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 5%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 240 3.7% 15.9%;
+    --input: 0 0% 25%;
+    --ring: 142.4 71.8% 29.2%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --radius: 0.4rem;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 100 50% 10%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 100 50% 7%;
+    --sidebar-accent-foreground: 100 50% 35%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body,
+  html {
+    @apply bg-brand-black text-foreground !important;
+  }
+}
+
+
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: relative;
+    width: min(100%, 680px);
+    margin: 0 auto;
+    padding: 2rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  body,
+  html,
+  main {
+    background: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
