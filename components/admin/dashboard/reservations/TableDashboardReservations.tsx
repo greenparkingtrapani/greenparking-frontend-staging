@@ -164,12 +164,12 @@ export function TableDashboardReservations({
               <TableCell className="first:border-l-0 border-l border-border/40 md:border-l-0 text-center align-middle p-2 md:p-4">
                 <div>
                   <div className="font-medium text-reservation-active text-[10px] md:text-sm">
-                    €{(reservation.total_price || 0).toFixed(2)}
+                    â‚¬{(reservation.total_price || 0).toFixed(2)}
                   </div>
                   {reservation.payment_method_id === 1 && reservation.deposit_payment !== undefined ? (
                     <div className="text-[10px] md:text-xs text-muted-foreground">
-                      <div>Seña: €{reservation.deposit_payment.toFixed(2)}</div>
-                      <div>Sito: €{(reservation.total_price - reservation.deposit_payment).toFixed(2)}</div>
+                      <div>SeÃ±a: â‚¬{reservation.deposit_payment.toFixed(2)}</div>
+                      <div>Sito: â‚¬{(reservation.total_price - reservation.deposit_payment).toFixed(2)}</div>
                     </div>
                   ) : null}
                 </div>
@@ -262,7 +262,7 @@ export function TableDashboardReservations({
                   </AlertDialog>
                 )}
                 {/* GREENPARKING_DELETE_V1: do not offer physical deletion for paid bookings */}
-                {(reservation.status === "finished" || reservation.status === "canceled") &&
+                {["pending", "finished", "canceled"].includes(reservation.status) && !reservation.stripe_session_id &&
                   !["succeeded", "refunded", "paid"].includes((reservation.payment_status || "").toLowerCase()) && (
                   <AlertDialog open={purgeCode === reservation.code} onOpenChange={(open) => {
                     setPurgeCode(open ? reservation.code : null);
@@ -277,8 +277,8 @@ export function TableDashboardReservations({
                       <AlertDialogHeader>
                         <AlertDialogTitle>Eliminazione definitiva</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Eliminerai definitivamente la prenotazione {reservation.code}. Non è un annullamento e non genera rimborsi.
-                          Questa operazione non si può annullare. Digita il codice per confermare.
+                          Eliminerai definitivamente la prenotazione {reservation.code}. Non Ã¨ un annullamento e non genera rimborsi.
+                          Questa operazione non si puÃ² annullare. Digita il codice per confermare.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <input aria-label="Digita il codice prenotazione" className="w-full rounded border bg-background p-2" value={typedCode} onChange={(e) => setTypedCode(e.target.value.trim())} placeholder={reservation.code} />
