@@ -8,15 +8,15 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
     title: "Tariffe, convenzioni e servizi", subtitle: "Le nostre soluzioni per chi parte da Trapani.",
     moto: "Parcheggio moto", hour: "€1 / ora", day: "€8 / 24 ore", storage: "Rimessaggio moto", season: "Da ottobre a maggio · €50 / mese", storageNote: "Contattaci per disponibilità e condizioni del rimessaggio stagionale.",
     agreements: "Convenzioni", agreementsNote: "Per soggiorni prolungati, gruppi e convenzioni personalizzate, richiedi un preventivo.",
-    bikes: "Biciclette", soon: "Prossimamente", luggage: "Deposito bagagli", luggageNote: "Servizio in preparazione: presto sarà possibile prenotare indicando peso e dimensioni.", contact: "Chiedi informazioni", reserve: "Prenota il parcheggio",
+    bikes: "Biciclette", soon: "Prossimamente", luggage: "Deposito bagagli", luggageNote: "€1/ora fino a 10 kg · €2/ora fino a 20 kg · €3/ora oltre 20 kg. Richiesta con peso e dimensioni, conferma del personale e pagamento sul posto.", luggageAction: "Richiedi deposito bagagli", contact: "Chiedi informazioni", reserve: "Prenota il parcheggio",
   } : en ? {
     title: "Prices, partnerships and services", subtitle: "Parking solutions for departures from Trapani.",
     moto: "Motorcycle parking", hour: "€1 / hour", day: "€8 / 24 hours", storage: "Motorcycle storage", season: "October to May · €50 / month", storageNote: "Contact us for seasonal storage availability and terms.",
-    agreements: "Partnerships", agreementsNote: "Ask for a quote for extended stays, groups and partnerships.", bikes: "Bicycles", soon: "Coming soon", luggage: "Luggage storage", luggageNote: "Coming soon: reservations with luggage weight and dimensions.", contact: "Contact us", reserve: "Book parking",
+    agreements: "Partnerships", agreementsNote: "Ask for a quote for extended stays, groups and partnerships.", bikes: "Bicycles", soon: "Coming soon", luggage: "Luggage storage", luggageNote: "€1/hour up to 10 kg · €2/hour up to 20 kg · €3/hour over 20 kg. Submit a request with weight and dimensions; staff confirmation, pay on arrival.", luggageAction: "Request luggage storage", contact: "Contact us", reserve: "Book parking",
   } : {
     title: "Tarifas, convenios y servicios", subtitle: "Soluciones para quienes salen de Trapani.",
     moto: "Aparcamiento de motos", hour: "1 € / hora", day: "8 € / 24 horas", storage: "Guardamotos", season: "De octubre a mayo · 50 € / mes", storageNote: "Contáctanos para disponibilidad y condiciones.",
-    agreements: "Convenios", agreementsNote: "Pide un presupuesto para largas estancias, grupos y convenios.", bikes: "Bicicletas", soon: "Próximamente", luggage: "Consigna de equipaje", luggageNote: "Próximamente: reservas indicando peso y dimensiones.", contact: "Contacta", reserve: "Reservar aparcamiento",
+    agreements: "Convenios", agreementsNote: "Pide un presupuesto para largas estancias, grupos y convenios.", bikes: "Bicicletas", soon: "Próximamente", luggage: "Consigna de equipaje", luggageNote: "1 €/hora hasta 10 kg · 2 €/hora hasta 20 kg · 3 €/hora más de 20 kg. Solicitud con peso y dimensiones, confirmación del personal y pago en el establecimiento.", luggageAction: "Solicitar consigna", contact: "Contacta", reserve: "Reservar aparcamiento",
   };
 
   const cards = [
@@ -37,7 +37,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         </article>)}
       </div>
       <div className="mt-10 flex flex-wrap gap-4">
-        <Link className="rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground" href="/reservations/create">{copy.reserve}</Link>
+        <Link className="rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground" href="/luggage">{copy.luggageAction}</Link>
+        <Link className="rounded-lg border border-primary px-6 py-3" href="/reservations/create">{copy.reserve}</Link>
         <Link className="rounded-lg border border-primary px-6 py-3" href="/#contact">{copy.contact}</Link>
       </div>
     </div>
