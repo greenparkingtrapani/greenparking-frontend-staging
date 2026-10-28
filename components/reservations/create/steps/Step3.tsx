@@ -12,10 +12,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Wheel from "@/components/ui/wheel";
 import { format } from "date-fns";
-import { Wallet, Coins, CheckCircle2Icon, KeyRound } from "lucide-react";
+import { Coins, CheckCircle2Icon, KeyRound } from "lucide-react";
 import { ReservationFormData, CountryOption } from "@/types/reservation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getTotalPrice } from "@/lib/reservations/create/getTotalPrice";
@@ -24,7 +24,6 @@ import {
   getVehicleTypeKeyFromId,
   getPaymentMethodKeyFromId,
 } from "@/hooks/reservations/create/constants";
-import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
 
 interface Step3Props {
@@ -38,21 +37,13 @@ interface Step3Props {
   locale: string;
 }
 
-const paymentMethods = [
-  {
-    value: 2,
-    label: "payOnline",
-    icon: Wallet,
-  },
-  {
-    value: 1,
-    label: "payOnSite",
-    icon: Coins,
-  },
-];
+const paymentMethods = [{ value: 1, label: "payOnSite", icon: Coins }];
 
-// Porcentaje del depósito que se paga online cuando se selecciona "pagar en sitio"
-const DEPOSIT_PERCENTAGE = 0.3;
+const onsiteCopy = {
+  it: { notice: "Pagamento online temporaneamente disabilitato. Prenota ora e paga il 100% al parcheggio, in contanti o con carta.", success: "Prenotazione registrata!", reference: "Codice prenotazione", instructions: "Conserva questo codice e presentalo al parcheggio. Nessun pagamento online è stato richiesto.", again: "Effettua un'altra prenotazione" },
+  en: { notice: "Online payments are temporarily unavailable. Book now and pay the full amount at the car park by cash or card.", success: "Reservation confirmed!", reference: "Booking reference", instructions: "Keep this code and show it when you arrive. No online payment was charged.", again: "Make another reservation" },
+  es: { notice: "El pago en línea está desactivado temporalmente. Reserva ahora y paga el importe completo en el aparcamiento, en efectivo o con tarjeta.", success: "¡Reserva registrada!", reference: "Código de reserva", instructions: "Guarda este código y preséntalo al llegar. No se ha cobrado ningún pago en línea.", again: "Hacer otra reserva" },
+};
 
 const Step3 = ({
   t,
@@ -64,6 +55,12 @@ const Step3 = ({
   selectedCountry,
   locale,
 }: Step3Props) => {
+  const [confirmedCode, setConfirmedCode] = useState("");
+  const onsiteText = onsiteCopy[locale as keyof typeof onsiteCopy] || onsiteCopy.it;
+  useEffect(() => {
+    if (formData.paymentMethod !== 1) handleSelectChange("paymentMethod", 1);
+  }, [formData.paymentMethod, handleSelectChange]);
+
   //  Obtenemos el tipo de vehiculo
   const vehicleTypeId = formData.vehicleType;
 
@@ -90,13 +87,13 @@ const Step3 = ({
       user_email: formData.email,
       user_phone: `+${selectedCountry.dialCode}${formData.phone}`,
       vehicle_type_id: formData.vehicleType,
-      payment_method_id: formData.paymentMethod,
+      payment_method_id: 1,
       vehicle_plate: formData.licensePlate,
       vehicle_model: formData.vehicleModel,
       start_time,
       end_time,
       total_price: totalPrice ?? 0,
-      deposit_payment: formData.paymentMethod === 1 ? (totalPrice ?? 0) * DEPOSIT_PERCENTAGE : 0, //La seña se calcula en base al total y si el método es "onSite"
+      deposit_payment: 0,
       language: locale,
     };
   };
@@ -104,21 +101,9 @@ const Step3 = ({
   // Mutation para crear la reserva, a la cual le pasamos el payload construido
   const createReservationMutation = useMutation({
     mutationFn: createReservation,
-    onSuccess: async (reservation) => {
-      if (reservation && reservation.session_id) {
-        const stripe = await loadStripe(
-          process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!
-        );
-        if (stripe) {
-          await stripe.redirectToCheckout({
-            sessionId: reservation.session_id,
-          });
-        } else {
-          toast.error(t("submissionErrors.stripePaymentFailed"));
-        }
-      } else {
-        toast.error(t("submissionErrors.stripePaymentFailed"));
-      }
+    onSuccess: (reservation) => {
+      if (reservation?.code) setConfirmedCode(reservation.code);
+      else toast.error("Reservation could not be confirmed. Please contact the parking staff.");
     },
     onError: (error: any) => {
       toast.error(`Failed to create reservation: ${error.message}`);
@@ -133,8 +118,24 @@ const Step3 = ({
 
   const isFetching = createReservationMutation.isPending;
 
+  if (confirmedCode) return (
+    <div role="status" className="space-y-5 rounded-xl border border-primary/40 bg-primary/10 p-6 text-center">
+      <CheckCircle2Icon className="mx-auto h-12 w-12 text-primary" />
+      <h2 className="text-2xl font-bold">{onsiteText.success}</h2>
+      <p>{onsiteText.reference}</p>
+      <p className="select-all rounded-lg border bg-background px-4 py-3 font-mono text-2xl font-bold">{confirmedCode}</p>
+      <p>{onsiteText.instructions}</p>
+      <p className="font-semibold">{onsiteText.notice}</p>
+      <Button type="button" onClick={() => window.location.reload()}>{onsiteText.again}</Button>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
+      <Alert className="border-primary/40 bg-primary/10">
+        <Coins className="h-4 w-4 text-primary" />
+        <AlertTitle>{onsiteText.notice}</AlertTitle>
+      </Alert>
       {/* Keys Required Alert */}
       <Alert className="border-warning dark:bg-warning/20">
         <KeyRound className="h-4 w-4 text-warning" />
@@ -146,11 +147,11 @@ const Step3 = ({
 
       <div className="space-y-4">
         <Label className="text-base md:text-lg font-medium">{t("paymentMethod")}</Label>
-        <div className="grid grid-cols-2 gap-2 md:gap-4">
+        <div className="grid grid-cols-1 gap-2 md:gap-4">
           {paymentMethods.map((method) => {
             const Icon = method.icon;
             const isSelected = formData.paymentMethod === method.value;
-            const paymentColorClass = method.value === 2 ? "text-payment-online" : "text-payment-onsite";
+            const paymentColorClass = "text-payment-onsite";
             return (
               <div
                 key={method.value}
@@ -239,21 +240,8 @@ const Step3 = ({
                 {t("discountApplied")}
               </div>
             )}
-            {formData.paymentMethod === 1 && totalPrice !== null && (
-              <div className="mt-2 space-y-1 text-xs md:text-sm text-muted-foreground">
-                <div className="flex justify-between">
-                  <span>
-                    {t("onlinePaymentAmount")}:
-                  </span>
-                  <span>€{(totalPrice * DEPOSIT_PERCENTAGE).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>
-                    {t("onsitePaymentAmount")}:
-                  </span>
-                  <span>€{(totalPrice * (1 - DEPOSIT_PERCENTAGE)).toFixed(2)}</span>
-                </div>
-              </div>
+            {totalPrice !== null && (
+              <p className="mt-3 text-sm font-semibold text-primary">{onsiteText.notice}</p>
             )}
           </div>
         </div>
@@ -266,7 +254,7 @@ const Step3 = ({
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
-              disabled={isFetching || !formData.paymentMethod}
+              disabled={isFetching || !formData.paymentMethod || totalPrice === null}
               role="link"
               size="mobile"
             >
