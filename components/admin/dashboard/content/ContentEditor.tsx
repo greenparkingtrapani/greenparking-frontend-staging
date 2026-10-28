@@ -40,6 +40,9 @@ export default function ContentEditor() {
   const [dirty, setDirty] = useState(false);
   const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/$/, "");
   useEffect(() => {
+    let active = true;
+    queueMicrotask(() => {
+    if (!active) return;
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
@@ -48,7 +51,37 @@ export default function ContentEditor() {
       }
     } catch { /* invalid draft ignored */ }
     setLoaded(true);
+    });
+    return () => { active = false; };
   }, []);
+  useEffect(() => {
+    if (!loaded) return;
+    const controller = new AbortController();
+    Promise.resolve().then(() => {
+    if (controller.signal.aborted) return;
+    setBusy(true);
+    setStatus("");
+    return fetch(`${apiUrl}/api/site-content?language=${encodeURIComponent(lang)}&section=${encodeURIComponent(section)}`, { cache: "no-store", signal: controller.signal });
+    })
+      .then(async response => {
+        if (!response) return;
+        if (!response.ok) throw new Error(`Lettura non riuscita (HTTP ${response.status})`);
+        const data: { fields?: Record<string, string> } = await response.json();
+        if (controller.signal.aborted) return;
+        setDraft(old => {
+          const next = copy(old);
+          next[lang][section] = copy(originals[lang][section]);
+          for (const [key, value] of Object.entries(data.fields || {})) {
+            if (key.startsWith(`${section}.`) && !key.split(".").some(part => ["__proto__", "constructor", "prototype", ""].includes(part)) && typeof value === "string") setPath(next[lang], key, value);
+          }
+          return next;
+        });
+        setDirty(false);
+      })
+      .catch((error: unknown) => { if (!controller.signal.aborted) setStatus(error instanceof Error ? error.message : "Errore durante il caricamento."); })
+      .finally(() => { if (!controller.signal.aborted) setBusy(false); });
+    return () => controller.abort();
+  }, [loaded, lang, section, apiUrl]);
   const fields = useMemo(() => Object.entries(flatten(draft[lang][section], section)).filter(([key]) => key.toLowerCase().includes(search.toLowerCase())), [draft, lang, section, search]);
   const update = (key: string, value: string) => {
     setDraft(old => {
@@ -119,7 +152,7 @@ export default function ContentEditor() {
       <label htmlFor="cms-section">Sezione</label><select disabled={busy} id="cms-section" className="bg-background border rounded p-2" value={section} onChange={e => setSection(e.target.value)}>{sections.map(x => <option key={x} value={x}>{x}</option>)}</select>
       <input aria-label="Cerca un campo" placeholder="Cerca campo..." className="bg-background border rounded p-2" value={search} onChange={e => setSearch(e.target.value)}/>
     </div>
-    <div className="space-y-4">{fields.map(([key, value]) => <label className="block space-y-1" key={key}><span className="text-sm font-semibold">{key}</span><textarea disabled={busy} rows={Math.min(6, Math.max(2, Math.ceil(value.length / 85)))} className="w-full rounded border bg-background p-3 text-sm" value={value} onChange={e => update(key, e.target.value)}/></label>)}{fields.length === 0 && <p>Nessun campo trovato.</p>}</div>
+    <div className="space-y-4">{fields.map(([key, value]) => <label className="block space-y-1" key={key}><span className="text-sm font-semibold">{key}</span><textarea disabled={busy} rows={Math.min(6, Math.max(2, Math.ceil(value.length / 85)))} className="w-full rounded border bg-background p-3 text-base sm:text-sm" value={value} onChange={e => update(key, e.target.value)}/></label>)}{fields.length === 0 && <p>Nessun campo trovato.</p>}</div>
     {status && <p role="status" className="text-sm rounded border p-3">{status}</p>}
     {dirty && <p className="text-sm">Modifiche non ancora salvate nel database.</p>}
     <div className="flex flex-wrap gap-2"><button disabled={!loaded} className="bg-primary text-primary-foreground rounded px-4 py-2 disabled:opacity-50" onClick={saveDraft}>Salva bozza locale</button><button disabled={busy || !loaded} className="border rounded px-4 py-2 disabled:opacity-50" onClick={loadDatabase}>Carica dal database</button><button disabled={busy || !loaded} className="bg-primary text-primary-foreground rounded px-4 py-2 disabled:opacity-50" onClick={saveDatabase}>{busy ? "Attendere..." : "Salva nel database"}</button><button className="border rounded px-4 py-2" onClick={exportDraft}>Esporta JSON</button><button disabled={busy} className="border rounded px-4 py-2" onClick={reset}>Ripristina lingua</button></div>

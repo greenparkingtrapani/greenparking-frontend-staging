@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getPrices } from "@/lib/landing/getPrices";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import PricingTable from "@/components/landing/PricingTable";
 import { motion, useReducedMotion } from "framer-motion";
 import { useInView } from "framer-motion";
@@ -10,7 +10,20 @@ import { useRef } from "react";
 import { BadgePercent, CreditCard, Tag } from "lucide-react";
 
 export default function PricingSection() {
-  const t = useTranslations("PricingSection");
+  const translations = useTranslations("PricingSection");
+  const locale = useLocale();
+  const { data: cmsFields } = useQuery<Record<string, string>>({
+    queryKey: ["site-content", locale, "PricingSection"],
+    queryFn: async () => {
+      const api = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/$/, "");
+      const response = await fetch(`${api}/api/site-content?language=${encodeURIComponent(locale)}&section=PricingSection`, { cache: "no-store" });
+      if (!response.ok) throw new Error("CMS unavailable");
+      return (await response.json()).fields || {};
+    },
+    retry: false,
+    staleTime: 0,
+  });
+  const t = (key: string): string => cmsFields?.[`PricingSection.${key}`] ?? cmsFields?.[key] ?? translations(key);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
   const prefersReducedMotion = useReducedMotion();

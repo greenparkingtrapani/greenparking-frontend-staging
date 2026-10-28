@@ -17,8 +17,8 @@ import { motion } from "framer-motion";
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isAdminRoute, setIsAdminRoute] = useState(false);
   const pathname = usePathname();
+  const isAdminRoute = pathname.includes("/admin");
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("Header");
@@ -56,11 +56,6 @@ export function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Check if current route is in admin section (client-side only)
-  useEffect(() => {
-    setIsAdminRoute(pathname.includes('/admin'));
-  }, [pathname]);
 
   const languages = [
     { code: "en", name: "English" },

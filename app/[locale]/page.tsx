@@ -1,3 +1,4 @@
+import { getSeoCopy } from "@/lib/site-content-server";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import AboutSection from '@/components/landing/AboutSection';
@@ -15,7 +16,7 @@ export async function generateMetadata({
   const validLocale = locales.includes(locale as (typeof locales)[number])
     ? (locale as (typeof locales)[number])
     : "en";
-  const t = await getTranslations({ locale: validLocale, namespace: "SEO" });
+  const t = await getSeoCopy(validLocale);
 
   return getLandingMetadata(validLocale, t("title"), t("description"));
 }
