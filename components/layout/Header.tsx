@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Menu, X, Globe, Car, Settings2 , CalendarClock } from "lucide-react";
+import { Menu, X, Globe, Car, Settings2, CalendarClock, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -156,6 +156,11 @@ export function Header() {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </Link>
             </div>
+            <div>
+              <Link href="/services" className={`text-sm flex items-center gap-1 hover:text-primary ${pathname === "/services" ? "text-primary" : "text-foreground"}`}>
+                <Tags className="h-4 w-4 text-primary" />{locale === "it" ? "Tariffe e servizi" : locale === "es" ? "Tarifas y servicios" : "Prices & services"}
+              </Link>
+            </div>
           </motion.div>
           {!isAdminRoute && (
             <div>
@@ -297,6 +302,11 @@ export function Header() {
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </div>
+            <div>
+              <Link href="/services" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2 py-2 text-foreground hover:text-primary">
+                <Tags className="h-4 w-4 text-primary" />{locale === "it" ? "Tariffe e servizi" : locale === "es" ? "Tarifas y servicios" : "Prices & services"}
+              </Link>
+            </div>
             </div>
           </nav>
         </motion.div>
