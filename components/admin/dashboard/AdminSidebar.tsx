@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAdminDashboardAuth } from "@/hooks/admin/dashboard/useAdminDashboardAuth"
-import { Calendar, Settings, Car, LogOut, FilePenLine } from "lucide-react"
+import { Calendar, Settings, Car, LogOut, FilePenLine, BriefcaseBusiness } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Sidebar,
@@ -19,6 +19,7 @@ import {
 
 const navigation = [
   { name: "Gestione Sito Web", href: "/admin/dashboard/content", icon: FilePenLine },
+  { name: "Deposito bagagli", href: "/admin/dashboard/luggage", icon: BriefcaseBusiness },
   {
     name: "Prenotazioni",
     href: "/admin/dashboard/reservations",

@@ -5,6 +5,7 @@ import AboutSection from '@/components/landing/AboutSection';
 import HeroSection from '@/components/landing/HeroSection';
 import ContactSection from '@/components/landing/ContactSection';
 import PricingSection from '@/components/landing/PricingSection';
+import LuggageSection from '@/components/landing/LuggageSection';
 import { getLandingMetadata, locales } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -63,6 +64,7 @@ export default async function LandingPage({
       <HeroSection />
       <AboutSection />
       <PricingSection />
+      <LuggageSection locale={validLocale} />
       <ContactSection />
     </div>
   );
