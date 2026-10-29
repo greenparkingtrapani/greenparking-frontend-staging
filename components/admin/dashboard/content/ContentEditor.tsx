@@ -8,7 +8,7 @@ import es from "@/messages/es.json";
 type Lang = "it" | "en" | "es";
 type Content = Record<string, unknown>;
 const originals: Record<Lang, Content> = { it, en, es };
-const sections = ["Header", "HeroSection", "AboutSection", "PricingSection", "ContactSection", "Footer", "SEO"];
+const sections = ["Header", "HeroSection", "AboutSection", "PricingSection", "ContactSection", "Footer", "SEO", "Reservation"];
 const storageKey = "greenparking-cms-draft-v1";
 
 function flatten(value: unknown, prefix = ""): Record<string, string> {
@@ -29,9 +29,9 @@ function setPath(obj: Content, path: string, value: string) {
 }
 function copy<T>(value: T): T { return JSON.parse(JSON.stringify(value)) as T; }
 
-export default function ContentEditor() {
+export default function ContentEditor({ initialSection = "HeroSection" }: { initialSection?: string }) {
   const [lang, setLang] = useState<Lang>("it");
-  const [section, setSection] = useState("HeroSection");
+  const [section, setSection] = useState(initialSection);
   const [draft, setDraft] = useState<Record<Lang, Content>>(() => copy(originals));
   const [loaded, setLoaded] = useState(false);
   const [search, setSearch] = useState("");
@@ -145,7 +145,7 @@ export default function ContentEditor() {
     setDirty(true);
   };
   return <main className="p-6 max-w-5xl space-y-5">
-    <div><h1 className="text-2xl font-bold">Gestione Sito Web</h1><p className="text-sm text-muted-foreground mt-1">Gestisci i testi del sito in italiano, inglese e spagnolo. Puoi conservare una bozza nel browser o salvare sul server collegato.</p></div>
+    <div><h1 className="text-2xl font-bold">{initialSection === "Reservation" ? "Testi e campi delle prenotazioni" : "Gestione Sito Web"}</h1><p className="text-sm text-muted-foreground mt-1">Gestisci i testi del sito in italiano, inglese e spagnolo. Puoi conservare una bozza nel browser o salvare sul server collegato.</p></div>
     <div className="rounded-lg border border-amber-500/50 p-3 text-sm">Attenzione: “Salva nel database” modifica i testi nell’ambiente a cui questa pagina è collegata. Verifica se stai operando su staging o sul sito ufficiale prima di confermare.</div>
     <div className="flex flex-wrap gap-3 items-center">
       <label htmlFor="cms-lang">Lingua</label><select disabled={busy} id="cms-lang" className="bg-background border rounded p-2" value={lang} onChange={e => setLang(e.target.value as Lang)}><option value="it">Italiano</option><option value="en">English</option><option value="es">Español</option></select>
