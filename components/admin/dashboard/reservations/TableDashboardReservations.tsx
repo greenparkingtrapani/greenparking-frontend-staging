@@ -131,7 +131,7 @@ export function TableDashboardReservations({
               <TableCell className="first:border-l-0 border-l border-border/40 md:border-l-0 text-center align-middle p-2 md:p-4">
                 <div>
                   <div className="font-medium text-[10px] md:text-sm">
-                    {reservation.vehicle_type_name.toLowerCase() === "motorcycle" ? (
+                    {["motorcycle", "electric_bicycle"].includes(reservation.vehicle_type_name.toLowerCase()) ? (
                       <Bike aria-hidden="true" className="mr-1 inline h-3 w-3 text-vehicle-motorcycle md:h-4 md:w-4" />
                     ) : (
                       <Car aria-hidden="true" className="mr-1 inline h-3 w-3 text-vehicle-car md:h-4 md:w-4" />
