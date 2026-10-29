@@ -24,7 +24,7 @@ export default function AdminDashboardReservations() {
   const itemsPerPage = 10;
   const [sort, setSort] = useState<ReservationSort>(null);
   /* GREENPARKING_AGENDA_V1 */
-  const [view, setView] = useState<"today" | "upcoming" | "archive" | "all">("today");
+  const [view, setView] = useState<"today" | "upcoming" | "archive" | "all">("all");
   const changeView = (next: typeof view) => {
     setView(next);
     setSort(null);
