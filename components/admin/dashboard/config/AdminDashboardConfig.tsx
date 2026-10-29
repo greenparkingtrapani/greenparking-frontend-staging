@@ -9,6 +9,7 @@ import Wheel from "@/components/ui/wheel";
 import { VehicleConfig } from "@/types/reservation";
 import { useAdminConfig } from "@/hooks/admin/dashboard/config/useAdminConfig";
 import { useAdminDashboardAuth } from "@/hooks/admin/dashboard/useAdminDashboardAuth";
+import ContentEditor from "@/components/admin/dashboard/content/ContentEditor";
 
 export default function AdminDashboardConfig() {
   // Hooks para autenticación
@@ -101,6 +102,9 @@ export default function AdminDashboardConfig() {
             />
           ))}
       </div>
+      <section className="mt-10 border-t border-border pt-6">
+        <ContentEditor initialSection="Reservation" />
+      </section>
     </div>
   );
 }

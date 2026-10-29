@@ -12,7 +12,7 @@ import Step3 from "./steps/Step3";
 import Step4 from "./steps/Step4";
 import { useReservationForm } from "../../../hooks/reservations/create/useReservationForm";
 import StepNavigation from "./StepNavigation";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -38,8 +38,37 @@ const countryOptions =
   }));
 
 export default function CreateReservation() {
-  const t = useTranslations("Reservation");
+  const baseT = useTranslations("Reservation");
   const locale = useLocale();
+  const [editedCopy, setEditedCopy] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const controller = new AbortController();
+    const api = process.env.NEXT_PUBLIC_API_URL;
+    if (!api) return;
+    fetch(`${api.replace(/\/$/, "")}/api/site-content?language=${encodeURIComponent(locale)}&section=Reservation`, {
+      signal: controller.signal,
+      cache: "no-store",
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Unable to load reservation content");
+        return response.json() as Promise<{ fields?: Record<string, string> }>;
+      })
+      .then(data => {
+        const safe: Record<string, string> = {};
+        for (const [key, value] of Object.entries(data.fields || {})) {
+          if (key.startsWith("Reservation.") && typeof value === "string" && value.trim()) {
+            safe[key.slice("Reservation.".length)] = value;
+          }
+        }
+        setEditedCopy(safe);
+      })
+      .catch(() => { /* Keep bundled translations if CMS is unavailable. */ });
+    return () => controller.abort();
+  }, [locale]);
+  const t = useCallback(
+    (key: string): string => editedCopy[key] ?? baseT(key as Parameters<typeof baseT>[0]),
+    [editedCopy, baseT],
+  );
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
 
@@ -140,13 +169,6 @@ export default function CreateReservation() {
       <div className="absolute bottom-1/3 right-1/4 w-40 h-40 sm:w-96 sm:h-96 rounded-full bg-primary/20 blur-2xl pointer-events-none"></div>
       <div className="absolute top-2/3 left-2/3 w-24 h-24 sm:w-48 sm:h-48 rounded-full bg-primary/20 blur-2xl pointer-events-none"></div>
       <div className=" container mx-auto max-w-4xl w-full ">
-        <div role="status" className="mb-5 rounded-xl border border-primary/50 bg-primary/10 px-5 py-4 text-center text-sm font-semibold">
-          {locale === "en"
-            ? "Online payment is temporarily disabled. You can book now and pay at the car park by cash or card."
-            : locale === "es"
-              ? "Pago en línea desactivado temporalmente. Puedes reservar ahora y pagar en el aparcamiento en efectivo o con tarjeta."
-              : "Pagamento online temporaneamente disabilitato. Puoi prenotare ora e pagare al parcheggio, in contanti o con carta."}
-        </div>
         <div className="mb-6">
           <StepNavigation steps={steps} currentStep={currentStep} t={t} />
         </div>
