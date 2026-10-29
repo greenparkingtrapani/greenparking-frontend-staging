@@ -2,6 +2,7 @@
 export const VEHICLE_TYPE_IT_MAP: Record<string, string> = {
   car: "Auto",
   motorcycle: "Motocicletta",
+  sedan: "Berlina", suv: "SUV", electric_bicycle: "Bicicletta elettrica",
 };
 
 export function getVehicleTypeItalian(name: string): string {
@@ -76,7 +77,7 @@ export function mapReservationToPresentable(data: ReservationDashboard): MappedR
     firstName: data.user_name?.split(" ")[0] || "",
     lastName: data.user_name?.split(" ").slice(1).join(" ") || "",
     email: data.user_email,
-    vehicleType: getVehicleTypeKeyFromId(data.vehicle_type_id),
+    vehicleType: data.vehicle_type_name || getVehicleTypeKeyFromId(data.vehicle_type_id),
     entryDate: startDateTime.date,
     entryTime: startDateTime.time,
     exitDate: endDateTime.date,
