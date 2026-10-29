@@ -45,7 +45,7 @@ export default function CreateReservation() {
     const controller = new AbortController();
     const api = process.env.NEXT_PUBLIC_API_URL;
     if (!api) return;
-    fetch(`${api.replace(/\\/$/, "")}/api/site-content?language=${encodeURIComponent(locale)}&section=Reservation`, {
+    fetch(`${api.replace(/\/$/, "")}/api/site-content?language=${encodeURIComponent(locale)}&section=Reservation`, {
       signal: controller.signal,
       cache: "no-store",
     })
