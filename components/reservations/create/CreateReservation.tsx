@@ -113,7 +113,15 @@ export default function CreateReservation() {
     queryFn: ({ signal }) => getReservation(sessionId!, signal),
     enabled: isConfirmationMode,
     retry: 3,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    // Stripe redirects before the webhook can finish. Poll until the DB confirms payment.
+    refetchInterval: (query) => {
+      const current = query.state.data as ReservationDashboard | undefined;
+      if (!current || current.payment_method_id !== 2) return current ? false : 3000;
+      return ["succeeded", "paid", "completed"].includes(current.payment_status?.toLowerCase()) && current.status === "active"
+        ? false
+        : 3000;
+    },
   });
 
   // El step actual depende del modo
@@ -274,6 +282,20 @@ export default function CreateReservation() {
                       {t("goHome")}
                     </Button>
                   </div>
+                </div>
+              ) : reservation.payment_method_id === 2 &&
+                (!["succeeded", "paid", "completed"].includes(reservation.payment_status?.toLowerCase()) || reservation.status !== "active") ? (
+                <div role="status" className="space-y-3 text-center py-6">
+                  <p className="font-semibold">
+                    {locale === "it" ? "Pagamento in verifica" : locale === "es" ? "Pago en verificación" : "Payment verification in progress"}
+                  </p>
+                  <p className="text-muted-foreground">
+                    {locale === "it"
+                      ? "Attendi la conferma del pagamento. Non considerare ancora confermata la prenotazione; la pagina si aggiorna automaticamente."
+                      : locale === "es"
+                        ? "Espera la confirmación del pago. La reserva aún no está confirmada; esta página se actualizará automáticamente."
+                        : "Please wait for payment confirmation. Your booking is not confirmed yet; this page updates automatically."}
+                  </p>
                 </div>
               ) : (
                 <Step4
