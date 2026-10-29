@@ -130,7 +130,8 @@ export default function ContentEditor({ initialSection = "HeroSection" }: { init
         throw new Error("Salvataggio inviato, ma i testi ricaricati non corrispondono. Ricarica dal database prima di riprovare.");
       }
       setDirty(false);
-      setStatus(`PUBBLICATO: ${Object.keys(fields).length} testi salvati e verificati nel database. Le modifiche sono visibili sul sito pubblico aprendo o aggiornando la relativa pagina, senza deploy.`);\n      localStorage.setItem("greenparking-cms-last-publish", String(Date.now()));
+      setStatus(`PUBBLICATO: ${Object.keys(fields).length} testi salvati e verificati nel database. Le modifiche sono visibili sul sito pubblico aprendo o aggiornando la relativa pagina, senza deploy.`);
+      localStorage.setItem("greenparking-cms-last-publish", String(Date.now()));
     } catch (error) { setStatus(error instanceof Error ? error.message : "Errore durante il salvataggio."); }
     finally { setBusy(false); }
   };
