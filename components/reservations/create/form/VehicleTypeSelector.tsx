@@ -1,5 +1,6 @@
 import { Label } from "@/components/ui/label";
-import { Car, Bike, CheckCircle2Icon } from "lucide-react";
+import { CheckCircle2Icon } from "lucide-react";
+import { VehicleIcon } from "./VehicleIcon";
 import Wheel from "@/components/ui/wheel";
 
 interface VehicleTypeSelectorProps {
@@ -28,12 +29,11 @@ export default function VehicleTypeSelector({
   const choices = (names: string[]) => vehicleTypes.filter(v => names.includes(v.name));
   const tile = (type: {id:number;name:string}) => {
     const selected = type.id === selectedType;
-    const Icon = autoTypes.includes(type.name) ? Car : Bike;
     return (
       <button type="button" key={type.id} onClick={() => onTypeChange(type.id)}
         aria-pressed={selected}
         className={`relative flex min-h-28 flex-col items-center justify-center rounded-lg border-2 px-3 py-4 text-center transition-colors ${selected ? "border-primary bg-primary/10 ring-2 ring-primary/40" : "border-border bg-background/40 hover:border-primary"}`}>
-        <Icon className={`h-7 w-7 ${selected ? "text-primary" : "text-muted-foreground"}`} />
+        <VehicleIcon kind={type.name} className={`h-16 w-24 ${selected ? "text-primary" : "text-muted-foreground"}`} />
         <span className="mt-2 text-sm font-semibold">{t(type.name)}</span>
         {dimensions[type.name] && <span className="mt-1 text-xs text-muted-foreground">{dimensions[type.name]}</span>}
         {hourly[type.name] && <span className="mt-1 text-sm text-primary font-medium">{hourly[type.name]}</span>}
