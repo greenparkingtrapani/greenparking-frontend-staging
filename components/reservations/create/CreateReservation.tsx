@@ -140,13 +140,6 @@ export default function CreateReservation() {
       <div className="absolute bottom-1/3 right-1/4 w-40 h-40 sm:w-96 sm:h-96 rounded-full bg-primary/20 blur-2xl pointer-events-none"></div>
       <div className="absolute top-2/3 left-2/3 w-24 h-24 sm:w-48 sm:h-48 rounded-full bg-primary/20 blur-2xl pointer-events-none"></div>
       <div className=" container mx-auto max-w-4xl w-full ">
-        <div role="status" className="mb-5 rounded-xl border border-primary/50 bg-primary/10 px-5 py-4 text-center text-sm font-semibold">
-          {locale === "en"
-            ? "Online payment is temporarily disabled. You can book now and pay at the car park by cash or card."
-            : locale === "es"
-              ? "Pago en línea desactivado temporalmente. Puedes reservar ahora y pagar en el aparcamiento en efectivo o con tarjeta."
-              : "Pagamento online temporaneamente disabilitato. Puoi prenotare ora e pagare al parcheggio, in contanti o con carta."}
-        </div>
         <div className="mb-6">
           <StepNavigation steps={steps} currentStep={currentStep} t={t} />
         </div>
