@@ -43,7 +43,7 @@ const paymentMethods = [{ value: 1, label: "payOnSite", icon: Coins }, { value: 
 const onsiteCopy = {
   it: { notice: "Prenotazione senza pagamento anticipato: pagherai l'intero importo al parcheggio.", success: "Prenotazione registrata!", reference: "Codice prenotazione", instructions: "Conserva questo codice e presentalo al parcheggio. Nessun pagamento online è stato richiesto.", again: "Effettua un'altra prenotazione" },
   en: { notice: "Book now and pay the full amount at the car park by cash or card.", success: "Reservation confirmed!", reference: "Booking reference", instructions: "Keep this code and show it when you arrive. No online payment was charged.", again: "Make another reservation" },
-  es: { notice: "El pago en línea está desactivado temporalmente. Reserva ahora y paga el importe completo en el aparcamiento, en efectivo o con tarjeta.", success: "¡Reserva registrada!", reference: "Código de reserva", instructions: "Guarda este código y preséntalo al llegar. No se ha cobrado ningún pago en línea.", again: "Hacer otra reserva" },
+  es: { notice: "Reserva ahora y paga el importe completo en el aparcamiento, en efectivo o con tarjeta.", success: "¡Reserva registrada!", reference: "Código de reserva", instructions: "Guarda este código y preséntalo al llegar. No se ha cobrado ningún pago en línea.", again: "Hacer otra reserva" },
 };
 
 const Step3 = ({
