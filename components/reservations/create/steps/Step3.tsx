@@ -19,6 +19,7 @@ import { Coins, CreditCard, CheckCircle2Icon, KeyRound } from "lucide-react";
 import { ReservationFormData, CountryOption } from "@/types/reservation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getTotalPrice } from "@/lib/reservations/create/getTotalPrice";
+import { getVehicleTypes } from "@/lib/reservations/create/getVehicleTypes";
 import { createReservation } from "@/lib/reservations/create/createReservation";
 import {
   getVehicleTypeKeyFromId,
@@ -63,6 +64,8 @@ const Step3 = ({
 
   //  Obtenemos el tipo de vehiculo
   const vehicleTypeId = formData.vehicleType;
+  const { data: vehicleTypes = [] } = useQuery<{id:number;name:string}[]>({queryKey:["vehicleTypes"],queryFn:getVehicleTypes});
+  const vehicleName = vehicleTypes.find(v => v.id === vehicleTypeId)?.name;
 
   // Obtenemos el precio total
   const { data: totalPriceResponse = null, isFetching: fetchingPrice } = useQuery({
@@ -207,7 +210,7 @@ const Step3 = ({
           <div className="flex justify-between">
             <span>{t("vehicleType")}:</span>
             <span className="capitalize">
-              {formData.vehicleType ? t(getVehicleTypeKeyFromId(formData.vehicleType)) : "-"}
+              {formData.vehicleType ? t(vehicleName || getVehicleTypeKeyFromId(formData.vehicleType)) : "-"}
             </span>
           </div>
           <div className="flex justify-between">
