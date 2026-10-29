@@ -12,7 +12,7 @@ import Step3 from "./steps/Step3";
 import Step4 from "./steps/Step4";
 import { useReservationForm } from "../../../hooks/reservations/create/useReservationForm";
 import StepNavigation from "./StepNavigation";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -38,8 +38,37 @@ const countryOptions =
   }));
 
 export default function CreateReservation() {
-  const t = useTranslations("Reservation");
+  const baseT = useTranslations("Reservation");
   const locale = useLocale();
+  const [editedCopy, setEditedCopy] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const controller = new AbortController();
+    const api = process.env.NEXT_PUBLIC_API_URL;
+    if (!api) return;
+    fetch(`${api.replace(/\\/$/, "")}/api/site-content?language=${encodeURIComponent(locale)}&section=Reservation`, {
+      signal: controller.signal,
+      cache: "no-store",
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Unable to load reservation content");
+        return response.json() as Promise<{ fields?: Record<string, string> }>;
+      })
+      .then(data => {
+        const safe: Record<string, string> = {};
+        for (const [key, value] of Object.entries(data.fields || {})) {
+          if (key.startsWith("Reservation.") && typeof value === "string" && value.trim()) {
+            safe[key.slice("Reservation.".length)] = value;
+          }
+        }
+        setEditedCopy(safe);
+      })
+      .catch(() => { /* Keep bundled translations if CMS is unavailable. */ });
+    return () => controller.abort();
+  }, [locale]);
+  const t = useCallback(
+    (key: string): string => editedCopy[key] ?? baseT(key as Parameters<typeof baseT>[0]),
+    [editedCopy, baseT],
+  );
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
 
