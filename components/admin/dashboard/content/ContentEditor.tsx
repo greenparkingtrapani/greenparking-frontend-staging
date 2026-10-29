@@ -130,7 +130,7 @@ export default function ContentEditor({ initialSection = "HeroSection" }: { init
         throw new Error("Salvataggio inviato, ma i testi ricaricati non corrispondono. Ricarica dal database prima di riprovare.");
       }
       setDirty(false);
-      setStatus(`Salvataggio e ricaricamento verificati: ${Object.keys(fields).length} campi nel database di questo ambiente.`);
+      setStatus(`PUBBLICATO: ${Object.keys(fields).length} testi salvati e verificati nel database. Le modifiche sono visibili sul sito pubblico aprendo o aggiornando la relativa pagina, senza deploy.`);\n      localStorage.setItem("greenparking-cms-last-publish", String(Date.now()));
     } catch (error) { setStatus(error instanceof Error ? error.message : "Errore durante il salvataggio."); }
     finally { setBusy(false); }
   };
@@ -145,8 +145,8 @@ export default function ContentEditor({ initialSection = "HeroSection" }: { init
     setDirty(true);
   };
   return <main className="p-6 max-w-5xl space-y-5">
-    <div><h1 className="text-2xl font-bold">{initialSection === "Reservation" ? "Testi e campi delle prenotazioni" : "Gestione Sito Web"}</h1><p className="text-sm text-muted-foreground mt-1">Gestisci i testi del sito in italiano, inglese e spagnolo. Puoi conservare una bozza nel browser o salvare sul server collegato.</p></div>
-    <div className="rounded-lg border border-amber-500/50 p-3 text-sm">Attenzione: “Salva nel database” modifica i testi nell’ambiente a cui questa pagina è collegata. Verifica se stai operando su staging o sul sito ufficiale prima di confermare.</div>
+    <div><h1 className="text-2xl font-bold">{initialSection === "Reservation" ? "Testi e campi delle prenotazioni" : "Gestione Sito Web"}</h1><p className="text-sm text-muted-foreground mt-1">Gestisci i testi del sito in italiano, inglese e spagnolo. Premi “Salva e pubblica sul sito” per aggiornare immediatamente il sito collegato. Nessuna pubblicazione da GitHub o Railway è necessaria.</p></div>
+    <div className="rounded-lg border border-amber-500/50 p-3 text-sm">Il salvataggio modifica direttamente i testi del sito collegato a questa dashboard. Se sei sulla dashboard ufficiale, i cambiamenti diventano pubblici subito; le pagine già aperte possono richiedere un aggiornamento.</div>
     <div className="flex flex-wrap gap-3 items-center">
       <label htmlFor="cms-lang">Lingua</label><select disabled={busy} id="cms-lang" className="bg-background border rounded p-2" value={lang} onChange={e => setLang(e.target.value as Lang)}><option value="it">Italiano</option><option value="en">English</option><option value="es">Español</option></select>
       <label htmlFor="cms-section">Sezione</label><select disabled={busy} id="cms-section" className="bg-background border rounded p-2" value={section} onChange={e => setSection(e.target.value)}>{sections.map(x => <option key={x} value={x}>{x}</option>)}</select>
@@ -155,6 +155,6 @@ export default function ContentEditor({ initialSection = "HeroSection" }: { init
     <div className="space-y-4">{fields.map(([key, value]) => <label className="block space-y-1" key={key}><span className="text-sm font-semibold">{key}</span><textarea disabled={busy} rows={Math.min(6, Math.max(2, Math.ceil(value.length / 85)))} className="w-full rounded border bg-background p-3 text-base sm:text-sm" value={value} onChange={e => update(key, e.target.value)}/></label>)}{fields.length === 0 && <p>Nessun campo trovato.</p>}</div>
     {status && <p role="status" className="text-sm rounded border p-3">{status}</p>}
     {dirty && <p className="text-sm">Modifiche non ancora salvate nel database.</p>}
-    <div className="flex flex-wrap gap-2"><button disabled={!loaded} className="bg-primary text-primary-foreground rounded px-4 py-2 disabled:opacity-50" onClick={saveDraft}>Salva bozza locale</button><button disabled={busy || !loaded} className="border rounded px-4 py-2 disabled:opacity-50" onClick={loadDatabase}>Carica dal database</button><button disabled={busy || !loaded} className="bg-primary text-primary-foreground rounded px-4 py-2 disabled:opacity-50" onClick={saveDatabase}>{busy ? "Attendere..." : "Salva nel database"}</button><button className="border rounded px-4 py-2" onClick={exportDraft}>Esporta JSON</button><button disabled={busy} className="border rounded px-4 py-2" onClick={reset}>Ripristina lingua</button></div>
+    <div className="flex flex-wrap gap-2"><button disabled={!loaded} className="bg-primary text-primary-foreground rounded px-4 py-2 disabled:opacity-50" onClick={saveDraft}>Salva solo bozza (browser)</button><button disabled={busy || !loaded} className="border rounded px-4 py-2 disabled:opacity-50" onClick={loadDatabase}>Carica dal database</button><button disabled={busy || !loaded} className="bg-primary text-primary-foreground rounded px-4 py-2 disabled:opacity-50" onClick={saveDatabase}>{busy ? "Pubblicazione in corso..." : "Salva e pubblica sul sito"}</button><button className="border rounded px-4 py-2" onClick={exportDraft}>Esporta JSON</button><button disabled={busy} className="border rounded px-4 py-2" onClick={reset}>Ripristina lingua</button></div>
   </main>;
 }
