@@ -86,7 +86,7 @@
     "compact": "Compatta",
     "standard": "Standard",
     "motorcycle": "Motocicletta",
-    "car": "Auto",
+    "car": "Utilitaria",
     "entryDate": "Data di Ingresso",
     "entryTime": "Ora di Ingresso",
     "exitDate": "Data di Uscita",
@@ -186,7 +186,11 @@
     "exitDateTimeMustBeAfterEntry": "La data e l'ora di uscita devono essere successive a quelle di ingresso",
     "minimumOneHourReservation": "La prenotazione deve essere di almeno un'ora",
     "keysRequired": "Importante: Chiavi Richieste",
-    "keysRequiredMessage": "È necessario lasciare le chiavi del veicolo al nostro personale. Questo ci permette di spostare e sistemare il vostro veicolo secondo necessità per ottimizzare l'utilizzo dello spazio."
+    "keysRequiredMessage": "È necessario lasciare le chiavi del veicolo al nostro personale. Questo ci permette di spostare e sistemare il vostro veicolo secondo necessità per ottimizzare l'utilizzo dello spazio.",
+    "sedan": "Berlina",
+    "suv": "SUV",
+    "electric_bicycle": "Bicicletta elettrica",
+    "carCategory": "Auto — seleziona la dimensione"
   },
   "ManageReservation": {
     "online": "Online",

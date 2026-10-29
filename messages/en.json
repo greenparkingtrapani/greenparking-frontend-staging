@@ -86,7 +86,7 @@
     "compact": "Compact",
     "standard": "Standard",
     "motorcycle": "Motorcycle",
-    "car": "Car",
+    "car": "Small car",
     "entryDate": "Entry Date",
     "entryTime": "Entry Time",
     "exitDate": "Exit Date",
@@ -187,7 +187,11 @@
     "exitDateTimeMustBeAfterEntry": "Exit date and time must be after entry date and time",
     "minimumOneHourReservation": "Reservation must be at least one hour",
     "keysRequired": "Important: Keys Required",
-    "keysRequiredMessage": "You must leave your vehicle keys with our staff. This allows us to move and properly accommodate your vehicle as needed for optimal space utilization."
+    "keysRequiredMessage": "You must leave your vehicle keys with our staff. This allows us to move and properly accommodate your vehicle as needed for optimal space utilization.",
+    "sedan": "Sedan",
+    "suv": "SUV",
+    "electric_bicycle": "Electric bicycle",
+    "carCategory": "Car — choose the size"
   },
   "ManageReservation": {
     "online": "Online",
