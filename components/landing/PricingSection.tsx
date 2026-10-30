@@ -3,12 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { getPrices } from "@/lib/landing/getPrices";
 import { useLocale, useTranslations } from "next-intl";
-import Link from "next/link";
 import PricingTable from "@/components/landing/PricingTable";
 import { motion, useReducedMotion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import { BadgePercent, CreditCard, Tag, Luggage } from "lucide-react";
+import { BadgePercent, CreditCard, Tag } from "lucide-react";
 
 export default function PricingSection() {
   const translations = useTranslations("PricingSection");
@@ -119,16 +118,6 @@ export default function PricingSection() {
             style={{ translateZ: 0 }}
           >
             <PricingTable prices={prices ?? []} t={t} />
-            <div className="mx-auto mt-6 flex w-full max-w-2xl flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-5 text-left sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <Luggage className="mt-1 h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
-                <div>
-                  <h3 className="font-bold text-white">{locale === "en" ? "Luggage storage" : locale === "es" ? "Consigna de equipaje" : "Deposito bagagli"}</h3>
-                  <p className="text-sm text-zinc-300">{locale === "en" ? "From €1 per bag per hour · Pay on arrival" : locale === "es" ? "Desde 1 € por equipaje y hora · Pago en el establecimiento" : "Da 1 € per bagaglio all'ora · Pagamento sul posto"}</p>
-                </div>
-              </div>
-              <Link href={`/${locale}/luggage`} className="shrink-0 rounded-lg bg-primary px-4 py-2 text-center text-sm font-semibold text-primary-foreground hover:brightness-110">{locale === "en" ? "Request storage" : locale === "es" ? "Solicitar consigna" : "Richiedi deposito"}</Link>
-            </div>
             <p className="mx-auto mt-4 flex w-full max-w-2xl items-start gap-2 rounded-md border border-accent/30 bg-accent/10 px-4 py-2 text-center text-sm font-medium leading-relaxed text-accent-foreground sm:items-center">
               <BadgePercent className="mt-0.5 h-4 w-4 shrink-0 sm:mt-0" aria-hidden="true" />
               <span>
