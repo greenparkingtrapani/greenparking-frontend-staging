@@ -6,7 +6,6 @@ import UnavailableSlotsList from "../UnavailableSlotsList";
 import SimpleDateTimePicker from "../form/SimpleDateTimePicker";
 import ReservationDuration from "../ReservationDuration";
 import VehicleTypeSelector from "../form/VehicleTypeSelector";
-import VehicleCatalogSelector from "../form/VehicleCatalogSelector";
 import { toast } from "sonner";
 import {
   getMinSelectableDateInItaly,
@@ -267,20 +266,8 @@ const Step1 = ({
           t={t}
           vehicleTypes={vehicleTypes}
           selectedType={formData.vehicleType}
-          onTypeChange={(value) => {
-            handleSelectChange("vehicleType", value);
-            handleSelectChange("vehicleModel", "");
-          }}
+          onTypeChange={(value) => handleSelectChange("vehicleType", value)}
           fetching={fetchingVehicleTypes}
-        />
-        <VehicleCatalogSelector
-          vehicleTypes={vehicleTypes}
-          selectedType={formData.vehicleType}
-          vehicleModel={formData.vehicleModel}
-          onSelect={(model, type) => {
-            handleSelectChange("vehicleModel", model);
-            if (type !== formData.vehicleType) handleSelectChange("vehicleType", type);
-          }}
         />
 
         {!formData.vehicleType && formData.entryDate && formData.entryTime && (
