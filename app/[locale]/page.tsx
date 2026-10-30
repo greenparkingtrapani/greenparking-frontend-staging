@@ -62,9 +62,9 @@ export default async function LandingPage({
         }}
       />
       <HeroSection />
+      <LuggageSection locale={validLocale} />
       <AboutSection />
       <PricingSection />
-      <LuggageSection locale={validLocale} />
       <ContactSection />
     </div>
   );
