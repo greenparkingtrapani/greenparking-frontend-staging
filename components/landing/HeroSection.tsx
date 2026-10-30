@@ -50,7 +50,7 @@ export default function HeroSection() {
   const content = (key: string) => cmsFields[`HeroSection.${key}`] ?? cmsFields[key] ?? t(key);
 
   return (
-    <section className="w-full min-h-[580px] md:min-h-[670px] flex items-center justify-center py-20 md:py-24 bg-gradient-to-b from-brand-black to-brand-black/90 relative overflow-hidden">
+    <section className="w-full min-h-0 flex items-center justify-center pt-24 pb-8 md:pt-28 md:pb-10 bg-gradient-to-b from-brand-black to-brand-black/90 relative overflow-hidden">
       {/* Background elements - optimized with pointer-events-none and will-change */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <motion.div
@@ -134,7 +134,7 @@ export default function HeroSection() {
 
       <div className="container relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center justify-center">
         <motion.div
-          className="flex flex-col items-center justify-center w-full space-y-6 text-center"
+          className="flex flex-col items-center justify-center w-full space-y-5 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
