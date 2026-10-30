@@ -213,40 +213,32 @@ export default function HeroSection() {
           </motion.div>
 
           <motion.div
-            className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-3 will-change-transform"
+            className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-3"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            style={{ translateZ: 0 }}
           >
-            <motion.div
-              className="flex items-center gap-1 sm:gap-2 bg-brand-black/40 backdrop-blur-sm py-1.5 px-3 sm:py-2 sm:px-4 rounded-full border border-primary/10 hover:border-primary/30 transition-all duration-300 will-change-transform"
-              whileHover={{ scale: 1.05, y: -5 }}
-              style={{ translateZ: 0 }}
-            >
-              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <span className="text-sm sm:text-base font-semibold">{content("service247")}</span>
-            </motion.div>
-            <motion.div
-              className="flex items-center gap-1 sm:gap-2 bg-brand-black/40 backdrop-blur-sm py-1.5 px-3 sm:py-2 sm:px-4 rounded-full border border-primary/10 hover:border-primary/30 transition-all duration-300 will-change-transform"
-              whileHover={{ scale: 1.05, y: -5 }}
-              style={{ translateZ: 0 }}
-            >
-              <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <span className="text-sm sm:text-base font-semibold">
-                {content("securePayment")}
-              </span>
-            </motion.div>
-            <motion.div
-              className="flex items-center gap-1 sm:gap-2 bg-brand-black/40 backdrop-blur-sm py-1.5 px-3 sm:py-2 sm:px-4 rounded-full border border-primary/10 hover:border-primary/30 transition-all duration-300 will-change-transform"
-              whileHover={{ scale: 1.05, y: -5 }}
-              style={{ translateZ: 0 }}
-            >
-              <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <span className="text-sm sm:text-base font-semibold">
-                {content("easyBooking")}
-              </span>
-            </motion.div>
+            {([
+              { key: "service247", icon: Clock, details: locale === "en" ? ["Open 24 hours a day", "Video-monitored area", "Remote access assistance", "Personal access code where provided"] : locale === "es" ? ["Abierto las 24 horas", "Zona videovigilada", "Asistencia para apertura remota", "Código personal de acceso cuando esté disponible"] : ["Aperto 24 ore su 24", "Area videosorvegliata", "Assistenza per apertura da remoto", "Codice personale dove previsto"] },
+              { key: "securePayment", icon: CreditCard, details: locale === "en" ? ["Secure online payment via Stripe", "Or pay directly at the car park", "Protected online transactions"] : locale === "es" ? ["Pago online seguro con Stripe", "O paga directamente en el aparcamiento", "Transacciones online protegidas"] : ["Pagamento online sicuro con Stripe", "Oppure pagamento direttamente al parcheggio", "Transazioni online protette"] },
+              { key: "easyBooking", icon: Calendar, details: locale === "en" ? ["Book in just a few steps", "Choose dates and service", "Confirmation after booking is processed"] : locale === "es" ? ["Reserva en pocos pasos", "Elige fechas y servicio", "Confirmación tras procesar la reserva"] : ["Prenota in pochi passaggi", "Scegli date e servizio", "Conferma dopo l'elaborazione della prenotazione"] },
+            ] as const).map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.key} className="group relative">
+                  <button type="button" aria-label={content(item.key)} aria-describedby={`info-${item.key}`} className="peer flex items-center gap-2 rounded-full border border-primary/20 bg-brand-black/70 px-3 py-2 text-sm font-semibold transition-colors hover:border-primary/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary sm:px-4">
+                    <Icon className="h-4 w-4 text-primary" />
+                    {content(item.key)}
+                  </button>
+                  <div id={`info-${item.key}`} role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-3 w-64 -translate-x-1/2 translate-y-1 rounded-xl border border-primary/50 bg-zinc-950 p-4 text-left text-sm text-white opacity-0 shadow-xl shadow-primary/10 transition-all duration-200 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                    <p className="mb-2 font-bold text-primary">{content(item.key)}</p>
+                    <ul className="space-y-2">
+                      {item.details.map((detail) => <li key={detail} className="flex gap-2"><span className="text-primary" aria-hidden="true">✓</span><span>{detail}</span></li>)}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
           </motion.div>
         </motion.div>
       </div>
