@@ -5,6 +5,7 @@ import {
   Clock,
   CreditCard,
   Calendar,
+  Luggage,
   ChevronRight,
   Sparkles,
 } from "lucide-react";
@@ -49,7 +50,7 @@ export default function HeroSection() {
   const content = (key: string) => cmsFields[`HeroSection.${key}`] ?? cmsFields[key] ?? t(key);
 
   return (
-    <section className="w-full min-h-screen flex items-center justify-center bg-gradient-to-b from-brand-black to-brand-black/90 relative overflow-hidden">
+    <section className="w-full min-h-[580px] md:min-h-[670px] flex items-center justify-center py-20 md:py-24 bg-gradient-to-b from-brand-black to-brand-black/90 relative overflow-hidden">
       {/* Background elements - optimized with pointer-events-none and will-change */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <motion.div
@@ -133,7 +134,7 @@ export default function HeroSection() {
 
       <div className="container relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center justify-center">
         <motion.div
-          className="flex flex-col items-center justify-center w-full space-y-8 text-center"
+          className="flex flex-col items-center justify-center w-full space-y-6 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
@@ -191,6 +192,14 @@ export default function HeroSection() {
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ translateZ: 0 }}>
+              <Link href={`/${locale}/luggage`}>
+                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg border-primary/50 hover:border-primary text-primary hover:bg-primary/10 transition-colors duration-300">
+                  <Luggage className="h-5 w-5" />
+                  {locale === "en" ? "Request luggage storage" : locale === "es" ? "Solicitar consigna" : "Richiedi deposito bagagli"}
+                </Button>
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ translateZ: 0 }}>
               <Link href="#pricing">
                 <Button
                   size="lg"
@@ -204,7 +213,7 @@ export default function HeroSection() {
           </motion.div>
 
           <motion.div
-            className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-6 will-change-transform"
+            className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-3 will-change-transform"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
