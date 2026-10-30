@@ -90,7 +90,7 @@
     "compact": "Compacto",
     "standard": "Estándar",
     "motorcycle": "Motocicleta",
-    "car": "Auto",
+    "car": "Utilitario",
     "entryDate": "Fecha de Entrada",
     "entryTime": "Hora de Entrada",
     "exitDate": "Fecha de Salida",
@@ -192,7 +192,11 @@
     "exitDateTimeMustBeAfterEntry": "La fecha y hora de salida debe ser posterior a la de entrada",
     "minimumOneHourReservation": "La reserva debe ser de mínimo una hora",
     "keysRequired": "Importante: Llaves Requeridas",
-    "keysRequiredMessage": "Debe dejar las llaves de su vehículo con nuestro personal. Esto nos permite mover y acomodar su vehículo según sea necesario para optimizar el uso del espacio."
+    "keysRequiredMessage": "Debe dejar las llaves de su vehículo con nuestro personal. Esto nos permite mover y acomodar su vehículo según sea necesario para optimizar el uso del espacio.",
+    "sedan": "Berlina",
+    "suv": "SUV",
+    "electric_bicycle": "Bicicleta eléctrica",
+    "carCategory": "Coche — elige el tamaño"
   },
   "ManageReservation": {
     "online": "En línea",
@@ -269,4 +273,3 @@
     "adminDescription": "Administración de Green Parking."
   }
 }
-

@@ -41,7 +41,7 @@ export default function PricingSection() {
   return (
     <section
       id="pricing"
-      className="w-full scroll-mt-16 py-12 md:py-24 lg:py-32 2xl:py-32 bg-gradient-to-b from-brand-black/95 to-brand-black/90 relative overflow-hidden"
+      className="w-full scroll-mt-16 py-8 md:py-12 lg:py-14 2xl:py-14 bg-gradient-to-b from-brand-black/95 to-brand-black/90 relative overflow-hidden"
       ref={ref}
     >
       {/* Background elements - optimized with pointer-events-none and will-change */}
@@ -85,7 +85,7 @@ export default function PricingSection() {
       
       <div className="container px-4 md:px-6 relative z-10">
         <motion.div 
-          className="flex flex-col items-center justify-center space-y-8 text-center will-change-transform"
+          className="flex flex-col items-center justify-center space-y-5 text-center will-change-transform"
           initial={{ opacity: 0, y: 50 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.7 }}

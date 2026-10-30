@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getVehicleTypes } from "@/lib/reservations/create/getVehicleTypes";
 import { ReservationFormData } from "@/types/reservation";
 interface CountryOption {
   name: string;
@@ -44,6 +46,8 @@ const Step2 = ({
   nextStep,
   prevStep,
 }: Step2Props) => {
+  const { data: vehicleTypes = [] } = useQuery<{id:number;name:string}[]>({queryKey:["vehicleTypes"],queryFn:getVehicleTypes});
+  const isElectricBike = vehicleTypes.some(v => v.id === formData.vehicleType && v.name === "electric_bicycle");
   return (
     <div className="space-y-4">
       <div>
@@ -147,7 +151,7 @@ const Step2 = ({
       <div>
         <h3 className="text-base md:text-lg font-medium mb-2 md:mb-4">{t("vehicleInfo")}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
-          <div>
+          {!isElectricBike && <div>
             <Label htmlFor="licensePlate" className="text-xs md:text-sm">{t("licensePlate")}</Label>
             <Input
               id="licensePlate"
@@ -161,7 +165,7 @@ const Step2 = ({
             {touched.licensePlate && !formData.licensePlate && (
               <span className="text-xs md:text-sm text-destructive mt-1 block">{t("invalidLicensePlate")}</span>
             )}
-          </div>
+          </div>}
           <div>
             <Label htmlFor="vehicleModel" className="text-xs md:text-sm">{t("vehicleModel")}</Label>
             <Input
@@ -194,7 +198,7 @@ const Step2 = ({
             !isEmailValid(formData.email) ||
             !formData.phone ||
             !isPhoneValid(formData.phone) ||
-            !formData.licensePlate ||
+            (!isElectricBike && !formData.licensePlate) ||
             !formData.vehicleModel
           }
           size="mobile"

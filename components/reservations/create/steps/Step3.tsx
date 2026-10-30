@@ -12,13 +12,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Wheel from "@/components/ui/wheel";
 import { format } from "date-fns";
-import { Coins, CheckCircle2Icon, KeyRound } from "lucide-react";
+import { Coins, CreditCard, CheckCircle2Icon, KeyRound } from "lucide-react";
 import { ReservationFormData, CountryOption } from "@/types/reservation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getTotalPrice } from "@/lib/reservations/create/getTotalPrice";
+import { getVehicleTypes } from "@/lib/reservations/create/getVehicleTypes";
 import { createReservation } from "@/lib/reservations/create/createReservation";
 import {
   getVehicleTypeKeyFromId,
@@ -37,12 +38,12 @@ interface Step3Props {
   locale: string;
 }
 
-const paymentMethods = [{ value: 1, label: "payOnSite", icon: Coins }];
+const paymentMethods = [{ value: 1, label: "payOnSite", icon: Coins }, { value: 2, label: "payOnline", icon: CreditCard }];
 
 const onsiteCopy = {
-  it: { notice: "Pagamento online temporaneamente disabilitato. Prenota ora e paga il 100% al parcheggio, in contanti o con carta.", success: "Prenotazione registrata!", reference: "Codice prenotazione", instructions: "Conserva questo codice e presentalo al parcheggio. Nessun pagamento online è stato richiesto.", again: "Effettua un'altra prenotazione" },
-  en: { notice: "Online payments are temporarily unavailable. Book now and pay the full amount at the car park by cash or card.", success: "Reservation confirmed!", reference: "Booking reference", instructions: "Keep this code and show it when you arrive. No online payment was charged.", again: "Make another reservation" },
-  es: { notice: "El pago en línea está desactivado temporalmente. Reserva ahora y paga el importe completo en el aparcamiento, en efectivo o con tarjeta.", success: "¡Reserva registrada!", reference: "Código de reserva", instructions: "Guarda este código y preséntalo al llegar. No se ha cobrado ningún pago en línea.", again: "Hacer otra reserva" },
+  it: { notice: "Prenotazione senza pagamento anticipato: pagherai l'intero importo al parcheggio.", success: "Prenotazione registrata!", reference: "Codice prenotazione", instructions: "Conserva questo codice e presentalo al parcheggio. Nessun pagamento online è stato richiesto.", again: "Effettua un'altra prenotazione" },
+  en: { notice: "Book now and pay the full amount at the car park by cash or card.", success: "Reservation confirmed!", reference: "Booking reference", instructions: "Keep this code and show it when you arrive. No online payment was charged.", again: "Make another reservation" },
+  es: { notice: "Reserva ahora y paga el importe completo en el aparcamiento, en efectivo o con tarjeta.", success: "¡Reserva registrada!", reference: "Código de reserva", instructions: "Guarda este código y preséntalo al llegar. No se ha cobrado ningún pago en línea.", again: "Hacer otra reserva" },
 };
 
 const Step3 = ({
@@ -57,12 +58,14 @@ const Step3 = ({
 }: Step3Props) => {
   const [confirmedCode, setConfirmedCode] = useState("");
   const onsiteText = onsiteCopy[locale as keyof typeof onsiteCopy] || onsiteCopy.it;
-  useEffect(() => {
-    if (formData.paymentMethod !== 1) handleSelectChange("paymentMethod", 1);
-  }, [formData.paymentMethod, handleSelectChange]);
+  const notice = formData.paymentMethod === 2
+    ? (locale === "en" ? "Pay 100% online securely with Stripe. The booking will be confirmed after payment." : locale === "es" ? "Paga el 100% en línea con Stripe. La reserva se confirma después del pago." : "Paga il 100% online con Stripe. La prenotazione sarà confermata dopo il pagamento.")
+    : (locale === "en" ? "Book now and pay at the parking facility." : locale === "es" ? "Reserva ahora y paga en el aparcamiento." : "Prenota ora e paga al parcheggio, in contanti o con carta.");
 
   //  Obtenemos el tipo de vehiculo
   const vehicleTypeId = formData.vehicleType;
+  const { data: vehicleTypes = [] } = useQuery<{id:number;name:string}[]>({queryKey:["vehicleTypes"],queryFn:getVehicleTypes});
+  const vehicleName = vehicleTypes.find(v => v.id === vehicleTypeId)?.name;
 
   // Obtenemos el precio total
   const { data: totalPriceResponse = null, isFetching: fetchingPrice } = useQuery({
@@ -87,7 +90,7 @@ const Step3 = ({
       user_email: formData.email,
       user_phone: `+${selectedCountry.dialCode}${formData.phone}`,
       vehicle_type_id: formData.vehicleType,
-      payment_method_id: 1,
+      payment_method_id: formData.paymentMethod,
       vehicle_plate: formData.licensePlate,
       vehicle_model: formData.vehicleModel,
       start_time,
@@ -102,7 +105,11 @@ const Step3 = ({
   const createReservationMutation = useMutation({
     mutationFn: createReservation,
     onSuccess: (reservation) => {
-      if (reservation?.code) setConfirmedCode(reservation.code);
+      if (formData.paymentMethod === 2 && reservation?.url) {
+        window.location.assign(reservation.url);
+        return;
+      }
+      if (formData.paymentMethod === 1 && reservation?.code) setConfirmedCode(reservation.code);
       else toast.error("Reservation could not be confirmed. Please contact the parking staff.");
     },
     onError: (error: any) => {
@@ -134,7 +141,7 @@ const Step3 = ({
     <div className="space-y-4">
       <Alert className="border-primary/40 bg-primary/10">
         <Coins className="h-4 w-4 text-primary" />
-        <AlertTitle>{onsiteText.notice}</AlertTitle>
+        <AlertTitle>{notice}</AlertTitle>
       </Alert>
       {/* Keys Required Alert */}
       <Alert className="border-warning dark:bg-warning/20">
@@ -147,7 +154,7 @@ const Step3 = ({
 
       <div className="space-y-4">
         <Label className="text-base md:text-lg font-medium">{t("paymentMethod")}</Label>
-        <div className="grid grid-cols-1 gap-2 md:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
           {paymentMethods.map((method) => {
             const Icon = method.icon;
             const isSelected = formData.paymentMethod === method.value;
@@ -203,7 +210,7 @@ const Step3 = ({
           <div className="flex justify-between">
             <span>{t("vehicleType")}:</span>
             <span className="capitalize">
-              {formData.vehicleType ? t(getVehicleTypeKeyFromId(formData.vehicleType)) : "-"}
+              {formData.vehicleType ? t(vehicleName || getVehicleTypeKeyFromId(formData.vehicleType)) : "-"}
             </span>
           </div>
           <div className="flex justify-between">
@@ -241,7 +248,7 @@ const Step3 = ({
               </div>
             )}
             {totalPrice !== null && (
-              <p className="mt-3 text-sm font-semibold text-primary">{onsiteText.notice}</p>
+              <p className="mt-3 text-sm font-semibold text-primary">{notice}</p>
             )}
           </div>
         </div>

@@ -12,7 +12,7 @@ import Step3 from "./steps/Step3";
 import Step4 from "./steps/Step4";
 import { useReservationForm } from "../../../hooks/reservations/create/useReservationForm";
 import StepNavigation from "./StepNavigation";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -38,8 +38,37 @@ const countryOptions =
   }));
 
 export default function CreateReservation() {
-  const t = useTranslations("Reservation");
+  const baseT = useTranslations("Reservation");
   const locale = useLocale();
+  const [editedCopy, setEditedCopy] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const controller = new AbortController();
+    const api = process.env.NEXT_PUBLIC_API_URL;
+    if (!api) return;
+    fetch(`${api.replace(/\/$/, "")}/api/site-content?language=${encodeURIComponent(locale)}&section=Reservation`, {
+      signal: controller.signal,
+      cache: "no-store",
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Unable to load reservation content");
+        return response.json() as Promise<{ fields?: Record<string, string> }>;
+      })
+      .then(data => {
+        const safe: Record<string, string> = {};
+        for (const [key, value] of Object.entries(data.fields || {})) {
+          if (key.startsWith("Reservation.") && typeof value === "string" && value.trim()) {
+            safe[key.slice("Reservation.".length)] = value;
+          }
+        }
+        setEditedCopy(safe);
+      })
+      .catch(() => { /* Keep bundled translations if CMS is unavailable. */ });
+    return () => controller.abort();
+  }, [locale]);
+  const t = useCallback(
+    (key: string): string => editedCopy[key] ?? baseT(key as Parameters<typeof baseT>[0]),
+    [editedCopy, baseT],
+  );
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
 
@@ -84,7 +113,15 @@ export default function CreateReservation() {
     queryFn: ({ signal }) => getReservation(sessionId!, signal),
     enabled: isConfirmationMode,
     retry: 3,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    // Stripe redirects before the webhook can finish. Poll until the DB confirms payment.
+    refetchInterval: (query) => {
+      const current = query.state.data as ReservationDashboard | undefined;
+      if (!current || current.payment_method_id !== 2) return current ? false : 3000;
+      return ["succeeded", "paid", "completed"].includes(current.payment_status?.toLowerCase()) && current.status === "active"
+        ? false
+        : 3000;
+    },
   });
 
   // El step actual depende del modo
@@ -140,13 +177,6 @@ export default function CreateReservation() {
       <div className="absolute bottom-1/3 right-1/4 w-40 h-40 sm:w-96 sm:h-96 rounded-full bg-primary/20 blur-2xl pointer-events-none"></div>
       <div className="absolute top-2/3 left-2/3 w-24 h-24 sm:w-48 sm:h-48 rounded-full bg-primary/20 blur-2xl pointer-events-none"></div>
       <div className=" container mx-auto max-w-4xl w-full ">
-        <div role="status" className="mb-5 rounded-xl border border-primary/50 bg-primary/10 px-5 py-4 text-center text-sm font-semibold">
-          {locale === "en"
-            ? "Online payment is temporarily disabled. You can book now and pay at the car park by cash or card."
-            : locale === "es"
-              ? "Pago en línea desactivado temporalmente. Puedes reservar ahora y pagar en el aparcamiento en efectivo o con tarjeta."
-              : "Pagamento online temporaneamente disabilitato. Puoi prenotare ora e pagare al parcheggio, in contanti o con carta."}
-        </div>
         <div className="mb-6">
           <StepNavigation steps={steps} currentStep={currentStep} t={t} />
         </div>
@@ -252,6 +282,20 @@ export default function CreateReservation() {
                       {t("goHome")}
                     </Button>
                   </div>
+                </div>
+              ) : reservation.payment_method_id === 2 &&
+                (!["succeeded", "paid", "completed"].includes(reservation.payment_status?.toLowerCase()) || reservation.status !== "active") ? (
+                <div role="status" className="space-y-3 text-center py-6">
+                  <p className="font-semibold">
+                    {locale === "it" ? "Pagamento in verifica" : locale === "es" ? "Pago en verificación" : "Payment verification in progress"}
+                  </p>
+                  <p className="text-muted-foreground">
+                    {locale === "it"
+                      ? "Attendi la conferma del pagamento. Non considerare ancora confermata la prenotazione; la pagina si aggiorna automaticamente."
+                      : locale === "es"
+                        ? "Espera la confirmación del pago. La reserva aún no está confirmada; esta página se actualizará automáticamente."
+                        : "Please wait for payment confirmation. Your booking is not confirmed yet; this page updates automatically."}
+                  </p>
                 </div>
               ) : (
                 <Step4
